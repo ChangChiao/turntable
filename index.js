@@ -5,9 +5,11 @@ window.onload = () => {
   const btn_presents = document.querySelector("#btn-presents");
   const btn_envelopes = document.querySelector("#btn-envelopes");
   const btn_reset = document.querySelector("#btn-reset");
-
+  const pointer = document.querySelector(".pointer");
   let data = [];
   let game = null;
+  let gameType = ""
+  let totalAngle = 0
   const types = {
     presents: {
       playTimes: 10,
@@ -217,6 +219,7 @@ window.onload = () => {
   //
 
   function init(btn) {
+    gameType = btn.value;
     let type = btn.value;
     draw(types[type].data, types[type].data.length, type);
   }
@@ -233,4 +236,61 @@ window.onload = () => {
     wheel.classList.add("new");
     iconGroup.classList.add("new");
   });
+
+
+  const setIndex = () => {
+    types.presents.data = types.presents.data.map((vo, i) => {
+      return { ...vo, index: i };
+    });
+    types.envelopes.data = types.envelopes.data.map((vo, i) => {
+      return { ...vo, index: i };
+    });
+  };
+
+  setIndex();
+  const getRandom = (min, max) => {
+    return Math.floor(Math.random() * (max - min) + min);
+  };
+
+
+  const rotatePoiner = (deg) => {
+    if(totalAngle % 360 !== 0) {
+        totalAngle += (360 - totalAngle % 360);
+    }
+    totalAngle += deg
+    pointer.style.transformOrigin = "50% 50%";
+    pointer.style.transform = `rotate(${totalAngle}deg)`;
+    pointer.style.transitionDuration = "3s";
+}
+
+  const getItems = () => {
+    const list = types[gameType]?.data;
+    const existList = list.filter((item) => item.num > 0);
+    if(list.length === 0) return
+    const random = getRandom(0, existList.length - 1)
+    const target = existList[random];
+    console.log("target", target.index)
+    deduct(target.index);
+    const angle = getAngle(target.index) + 3600;
+    rotatePoiner(angle);
+    console.log("existList", existList);
+  };
+
+  const deduct = (index) => {
+    types[gameType].data[index].num--
+    console.log("afterList", types[gameType].data);
+  }
+
+  const getAngle = (num, part = 8) => {
+    return Math.round( 360 / part ) * num;
+  }
+
+  getItems("presents");
+
+  
+  pointer.addEventListener("click", getItems, false);
+
 };
+
+//use index get angel
+//filter num > 0 and draw
